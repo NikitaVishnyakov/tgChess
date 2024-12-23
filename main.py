@@ -8,7 +8,7 @@ from config import BOT_TOKEN
 
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # URL вашего хостинга с шахматным приложением
-    web_app_url = "https://ваш-домен.com/chess"
+    web_app_url = "https://tg-chess.vercel.app/"
 
     # Кнопка запуска Web App
     keyboard = [
@@ -18,6 +18,10 @@ async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
 
     await update.message.reply_text("Нажмите кнопку ниже, чтобы начать игру:", reply_markup=reply_markup)
 
+# Команда /stop
+async def stop(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    await update.message.reply_text("Игра остановлена. Чтобы начать новую, введите /play.")
+
 
 # Основной код
 def main():
@@ -25,6 +29,7 @@ def main():
 
     application = Application.builder().token(TOKEN).build()
     application.add_handler(CommandHandler("play", play))
+    application.add_handler(CommandHandler("stop", stop))
     application.run_polling()
 
 
