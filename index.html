@@ -4,8 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chess Game</title>
-    <!-- Подключение стилей для шахматной доски -->
-    <link rel="stylesheet" href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css">
+    <link rel="stylesheet"
+      href="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.css"
+      integrity="sha384-q94+BZtLrkL1/ohfjR8c6L+A6qzNH9R2hBLwyoAfu3i/WCvQjzL2RQJ3uNHDISdU"
+      crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.5.1.min.js"
+        integrity="sha384-ZvpUoO/+PpLXR1lu4jmpXWu80pZlYUAfxl5NsBMWOEPSjUn/6Z/hRTt8+pR6L4N2"
+        crossorigin="anonymous"></script>
+
+    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"
+        integrity="sha384-8Vi8VHwn3vjQ9eUHUxex3JSN/NFqUg3QbPyX8kWyb93+8AC/pPWTzj+nHtbC5bxD"
+        crossorigin="anonymous"></script>
     <style>
         /* Стили для контейнера доски */
         #board {
@@ -25,23 +35,61 @@
 </head>
 <body>
     <h1>Chess Game</h1>
-    <!-- Контейнер для шахматной доски -->
     <div id="board"></div>
-    <!-- Скрипты -->
-    <script src="https://code.jquery.com/jquery-3.5.1.min.js"></script>
-    <script src="https://unpkg.com/@chrisoakman/chessboardjs@1.0.0/dist/chessboard-1.0.0.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/chess.js/0.10.3/chess.min.js"></script>
+    <div id="status"></div>
+
     <script>
-        // Указываем путь к изображениям фигур
+        const API_URL = "http://127.0.0.1:5000"; // Указываем адрес Flask API
         const board = Chessboard('board', {
-            draggable: true, // Позволяет перетаскивать фигуры
-            position: 'start', // Начальная позиция
+            draggable: true,
+            position: 'start',
             pieceTheme: 'https://chessboardjs.com/img/chesspieces/wikipedia/{piece}.png',
-            onDrop: (source, target) => {
-                console.log(`Moved piece from ${source} to ${target}`);
-                // Дополнительная логика может быть добавлена здесь
+            onDrop: onDrop
+        });
+
+        const game_id = 'game1';
+
+        // ✅ Запускаем новую игру через Flask API
+        $.ajax({
+            url: `${API_URL}/start_game`,
+            type: "POST",
+            contentType: "application/json",
+            data: JSON.stringify({ game_id }),
+            success: function (data) {
+                console.log("Game started:", data);
+                $("#status").text("Game started");
+                board.position(data.fen); // Устанавливаем начальную позицию
+            },
+            error: function (xhr) {
+                alert("Ошибка старта игры: " + xhr.responseText);
             }
         });
+
+        // ✅ Отправка хода в Flask API
+        function onDrop(source, target) {
+            const move = `${source}${target}`;
+
+            $.ajax({
+                url: `${API_URL}/make_move`,
+                type: "POST",
+                contentType: "application/json",
+                data: JSON.stringify({ game_id, move }),
+                success: function (response) {
+                    if (response.error) {
+                        alert(response.error);
+                        board.position(response.fen);
+                    } else {
+                        board.position(response.fen);
+                        $("#status").text("Last move: " + move);
+                    }
+                },
+                error: function (xhr) {
+                    alert(xhr.responseJSON.error);
+                    board.position(response.fen);
+                }
+            });
+        }
     </script>
+
 </body>
 </html>
