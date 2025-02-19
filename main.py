@@ -8,7 +8,7 @@ from config import BOT_TOKEN
 
 async def play(update: Update, context: ContextTypes.DEFAULT_TYPE):
     # URL вашего хостинга с шахматным приложением
-    web_app_url = "https://tg-chess.vercel.app/"
+    web_app_url = "https://nikitavishnyakov.github.io/tgChess/"
 
     # Кнопка запуска Web App
     keyboard = [
