@@ -2,17 +2,22 @@ from flask import Flask, request, jsonify
 from flask_cors import CORS
 import chess
 import logging
+import os
 
 app = Flask(__name__)
-CORS(app)  # Разрешаем запросы с других доменов
+CORS(app)
 
-# Логирование
-logging.basicConfig(filename='server.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+PORT = int(os.environ.get("PORT", 10000))  # Используем порт, который задаёт Render
 
-# Храним текущие партии
+logging.basicConfig(filename='/tmp/server.log', level=logging.INFO, format='%(asctime)s - %(message)s')
+
 games = {}
 
-@app.route('/start_game', methods=['POST'])
+@app.route('/')
+def home():
+    return jsonify({"message": "Chess server is running!"})
+
+@app.route('/api/start_game', methods=['POST'])
 def start_game():
     game_id = request.json.get('game_id')
     if not game_id:
@@ -22,7 +27,7 @@ def start_game():
     logging.info(f"Game {game_id} started")
     return jsonify({'message': 'Game started', 'fen': games[game_id].fen()}), 200
 
-@app.route('/make_move', methods=['POST'])
+@app.route('/api/make_move', methods=['POST'])
 def make_move():
     game_id = request.json.get('game_id')
     move = request.json.get('move')
@@ -47,4 +52,4 @@ def make_move():
         return jsonify({'error': 'Invalid move'}), 400
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    app.run(host='0.0.0.0', port=PORT)
