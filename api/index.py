@@ -42,7 +42,7 @@ def make_move():
     try:
         chess_move = chess.Move.from_uci(move)
         if chess_move not in board.legal_moves:
-            return jsonify({'error': 'Illegal move'}), 400
+            return jsonify({'error': 'Illegal move', 'fen': board.fen()}), 400
 
         board.push(chess_move)
         logging.info(f"Move {move} made in game {game_id}")
